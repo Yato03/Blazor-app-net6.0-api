@@ -1,0 +1,55 @@
+﻿@page "/ToDo"
+
+@using System.Net.Http
+@using BlazorToDo.Data
+@inject HttpClient Http
+
+
+<h3>ToDo</h3>
+<hr />
+
+<div class="row">
+    <div class="col-12">
+        <a href="Form" class="btn btn-primary">Nuevo</a>
+    </div>
+</div>
+<br />
+
+<table class="table">
+    @if(oRespuesta != null && oRespuesta.Data!=null)
+    {
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Titulo</th>
+                <th>Descripcion</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var oElement in oRespuesta.Data)
+        {
+        <tr>
+            <td>@oElement.Id</td>
+            <td>@oElement.Titulo</td>
+            <td>@oElement.Descripcion</td>
+            <td>
+                <a href="/Form/@oElement.Id" class="btn btn-warning">Editar</a>
+                <a href="/eliminarTarea/@oElement.Id" class="btn btn-danger">Eliminar</a>
+            </td>
+        </tr>
+        }
+        </tbody>
+        
+    }
+    
+</table>
+
+@code {
+    public string url = "/api/Tarea";
+    public Respuesta<List<Main>> oRespuesta = new Respuesta<List<Main>>();
+
+    protected override async Task OnInitializedAsync() =>
+        oRespuesta = await Http.GetFromJsonAsync<Respuesta<List<Main>>>(url);
+
+}

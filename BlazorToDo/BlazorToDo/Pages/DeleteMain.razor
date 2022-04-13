@@ -1,0 +1,63 @@
+﻿@page "/eliminarTarea/{Id:int}"
+@using BlazorToDo.Data
+@using System.Net.Http
+@inject HttpClient Http
+@inject NavigationManager navigationManger
+
+<h3>Eliminar Tarea</h3>
+<hr />
+<br />
+
+@if (Id != 0)
+{
+    <div class="row mb-1 text-center">
+        
+        <div class="col-sm-7 mx-auto">
+            <p>¿¿Deseas eliminar @oMain.Titulo de la lista de tareas??</p>
+            <button class="btn btn-warning" @onclick="Cancelar">Cancelar</button>
+            <button class="btn btn-danger" @onclick="Eliminar">Eliminar</button>
+        </div>
+        
+    </div>
+    
+}
+else
+{
+    <p class="alert">Ha habido un error con el id</p>
+}
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    Respuesta<Main> oRespuestaMain = new Respuesta<Main>();
+    Main oMain = new Main();
+    public string url = "/api/Tarea";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id!=0)
+        {
+            oRespuestaMain = await Http.GetFromJsonAsync<Respuesta<Main>>(url + "/" + Id);
+            oMain = oRespuestaMain.Data;
+        }
+
+    }
+
+    private async Task Eliminar()
+    {
+        if (Id!=0)
+        {
+            var response = await Http.DeleteAsync(url+"/"+oMain.Id);
+            oRespuestaMain = response.Content.ReadFromJsonAsync<Respuesta<Main>>().Result;
+        }
+
+        navigationManger.NavigateTo("ToDo"); 
+    }
+
+    private void Cancelar()
+    {
+        navigationManger.NavigateTo("ToDo"); 
+    }
+
+}

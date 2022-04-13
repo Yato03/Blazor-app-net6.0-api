@@ -1,0 +1,66 @@
+﻿@page "/Form"
+@page "/Form/{Id:int}"
+@using BlazorToDo.Data
+@using System.Net.Http
+@inject HttpClient Http
+@inject NavigationManager navigationManager
+
+<h3>ToDo Form</h3>
+<hr />
+
+<EditForm Model="@oMain">
+    <div class="container-fluid">
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Titulo</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" @bind-Value="@oMain.Titulo"></InputText>
+            </div>
+        </div>
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Descripcion</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" @bind-Value="@oMain.Descripcion"></InputText>
+            </div>
+        </div>
+        <div class="form-group row mb-1">
+            <div class="col-sm-12">
+                <button class="btn btn-primary" @onclick="Save">Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    Main oMain = new Main();
+    Respuesta<object> oRespuesta = new Respuesta<object>();
+    Respuesta<Main> oRespuestaMain = new Respuesta<Main>();
+    public string url = "/api/Tarea";
+
+    private async Task Save()
+    {
+        if (Id!=0)
+        {
+           var response = await Http.PutAsJsonAsync<Main>(url, oMain);
+           oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<object>>().Result;
+        }
+        else
+        {
+           var response = await Http.PostAsJsonAsync<Main>(url, oMain);
+           oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<object>>().Result;
+        }
+        navigationManager.NavigateTo("ToDo"); 
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id!=0)
+        {
+            oRespuestaMain = await Http.GetFromJsonAsync<Respuesta<Main>>(url + "/" + Id);
+            oMain = oRespuestaMain.Data;
+        }
+        
+    }
+}
